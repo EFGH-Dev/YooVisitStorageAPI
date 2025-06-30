@@ -15,14 +15,7 @@ namespace YooVisitStorageAPI.Controllers // Assure-toi que le namespace est corr
         }
 
         [HttpPost("upload")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-
-        // --- CORRECTION CLÉ ---
-        // On ajoute ces attributs pour autoriser les fichiers volumineux (ex: 100 Mo).
-        // C'est crucial pour que le serveur Kestrel n'interrompe pas la connexion.
-        [RequestFormLimits(MultipartBodyLengthLimit = 100_000_000)]
+        [RequestFormLimits(MultipartBodyLengthLimit = 100_000_000)] // 100 Mo
         [RequestSizeLimit(100_000_000)]
         public async Task<IActionResult> UploadImage(IFormFile file)
         {
@@ -38,12 +31,10 @@ namespace YooVisitStorageAPI.Controllers // Assure-toi que le namespace est corr
             }
             catch (ArgumentException ex)
             {
-                // Erreur de validation (ex: mauvais type de fichier)
                 return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                // Pour le débogage, on affiche l'erreur dans la console de Docker
                 Console.WriteLine($"[ERREUR INTERNE] {ex.Message}");
                 return StatusCode(500, "Une erreur interne est survenue sur le serveur.");
             }
