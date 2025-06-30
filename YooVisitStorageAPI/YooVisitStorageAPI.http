@@ -1,0 +1,6 @@
+@YooVisitStorageAPI_HostAddress = http://localhost:5083
+
+GET {{YooVisitStorageAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

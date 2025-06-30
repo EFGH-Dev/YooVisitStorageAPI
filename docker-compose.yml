@@ -1,0 +1,14 @@
+services:
+  yoo-visit-api:
+    build: . # Construit l'image à partir du Dockerfile dans le même dossier
+    ports:
+      - "5000:8080" # Port de ton PC : Port du conteneur
+    volumes:
+      # On branche le volume persistant "photo-storage" au dossier du conteneur
+      - ./photos-stockees:/app/storage
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development # Pour le mode développement
+
+volumes:
+  # On déclare le volume pour que Docker le gère et le rende persistant
+  photo-storage:
