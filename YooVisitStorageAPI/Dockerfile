@@ -29,6 +29,6 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 
 # On crée le dossier qui servira de point de montage pour le volume Docker.
-RUN mkdir -p /app/storage
+RUN mkdir -p /app/storage/uploads && chown -R $APP_UID /app/storage
 
 ENTRYPOINT ["dotnet", "YooVisitStorageAPI.dll"]

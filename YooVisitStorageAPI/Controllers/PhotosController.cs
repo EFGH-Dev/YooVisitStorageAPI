@@ -27,6 +27,7 @@ namespace YooVisitStorageAPI.Controllers // Assure-toi que le namespace est corr
             try
             {
                 var savedFileName = await _storageService.SaveFileAsync(file, "uploads");
+                // On retourne une réponse 201 Created avec le nom du fichier
                 return CreatedAtAction(nameof(UploadImage), new { fileName = savedFileName });
             }
             catch (ArgumentException ex)

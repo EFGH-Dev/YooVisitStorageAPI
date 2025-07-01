@@ -8,6 +8,7 @@ services:
       - ./photos-stockees:/app/storage
     environment:
       - ASPNETCORE_ENVIRONMENT=Development # Pour le mode développement
+    user: root # Exécute le conteneur en tant que root pour éviter les problèmes de permissions
 
 volumes:
   # On déclare le volume pour que Docker le gère et le rende persistant
