@@ -1,19 +1,51 @@
-using YooVisitStorageAPI.PhotoInterface;
-using YooVisitStorageAPI.PhotoServices;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Text;
+using YooVisitStorageAPI.Data;
+using YooVisitStorageAPI.Interfaces;
+using YooVisitStorageAPI.Services;
 
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
 
 // --- Section Services ---
-builder.Services.AddControllers();
 
-// On réactive notre service de stockage de fichiers
+// On récupère la chaîne de connexion (fournie par docker-compose.yml)
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// On enregistre le DbContext UNE SEULE FOIS, et correctement.
+builder.Services.AddDbContext<StorageDbContext>(options =>
+    options.UseNpgsql(connectionString)
+);
+
+// On enregistre notre service de stockage de fichiers
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 
-// Configuration CORS
+// Configuration pour accepter les gros fichiers
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = 52428800; // 50 MB
+});
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 52428800; // 50 MB
+});
+
+builder.Services.AddControllers();
+builder.Services.AddSwaggerGen();
+
+// Configuration CORS (si nécessaire, sinon peut être enlevé)
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: MyAllowSpecificOrigins,
+    options.AddPolicy(name: "_myAllowSpecificOrigins",
                       policy =>
                       {
                           policy.AllowAnyOrigin()
@@ -22,31 +54,49 @@ builder.Services.AddCors(options =>
                       });
 });
 
-// Configuration de Swagger
-builder.Services.AddSwaggerGen();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        };
+    });
 
 var app = builder.Build();
 
 // --- Section Pipeline de Requêtes ---
 
-// On peut garder une sonde de débogage simple pour le mode Développement
 if (app.Environment.IsDevelopment())
 {
+    app.UseSwagger();
+    app.UseSwaggerUI();
+    // Middleware de débogage simple
     app.Use(async (context, next) =>
     {
-        Console.WriteLine($"--> Requête reçue: {context.Request.Method} {context.Request.Path}");
+        Console.WriteLine($"--> StorageAPI Request: {context.Request.Method} {context.Request.Path}");
         await next.Invoke();
     });
 }
 
-app.UseSwagger();
-app.UseSwaggerUI(c =>
+app.UseStaticFiles(new StaticFileOptions
 {
-    c.RoutePrefix = string.Empty;
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "YooVisit API V1");
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "storage")),
+    RequestPath = "/storage"
 });
 
-app.UseCors(MyAllowSpecificOrigins);
+app.UseCors("_myAllowSpecificOrigins");
+
+app.UseRouting(); // S'assure que le routage est en place
+app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 app.Run();

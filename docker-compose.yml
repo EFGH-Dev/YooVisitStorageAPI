@@ -1,8 +1,9 @@
 services:
-  yoo-visit-api:
+  yoovisitstorageapi:
+    container_name: yoovisit-storage-api
     build: . # Construit l'image à partir du Dockerfile dans le même dossier
     ports:
-      - "5000:8080" # Port de ton PC : Port du conteneur
+      - "8080:8080" # Port de ton PC : Port du conteneur
     volumes:
       # On branche le volume persistant "photo-storage" au dossier du conteneur
       - ./photos-stockees:/app/storage

@@ -22,6 +22,10 @@
 **/secrets.dev.yaml
 **/values.dev.yaml
 **/*.vsidx
+*.log
+*.DS_Store
+.idea
+*.sln.docstates
 LICENSE
 README.md
 !**/.gitignore
