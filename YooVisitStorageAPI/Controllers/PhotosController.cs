@@ -73,18 +73,27 @@ public class PhotosController : ControllerBase
     [HttpGet("all-photos")]
     public async Task<IActionResult> GetAllPhotos()
     {
-        var photos = await _context.Photos
-            .Select(p => new PhotoDto
-            {
-                Id = p.Id,
-                Latitude = p.Latitude,
-                Longitude = p.Longitude,
-                // On construit une URL publique pour l'image
-                ImageUrl = $"{Request.Scheme}://{Request.Host}/storage/{p.FileName}"
-            })
-            .ToListAsync();
+        var currentUserId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-        return Ok(photos);
+        var rawData = await (from photo in _context.Photos
+                             join user in _context.Users on photo.UserId equals user.IdUtilisateur
+                             select new
+                             {
+                                 PhotoData = photo,
+                                 UserEmail = user.Email
+                             }).ToListAsync();
+
+        var photosWithUser = rawData.Select(data => new PhotoDto
+            {
+                Id = data.PhotoData.Id,
+                Latitude = data.PhotoData.Latitude,
+                Longitude = data.PhotoData.Longitude,
+                ImageUrl = $"{Request.Scheme}://{Request.Host}/storage/{data.PhotoData.FileName}",
+                IsOwner = data.PhotoData.UserId == currentUserId,
+                UserName = data.UserEmail.Split('@').First()
+            }).ToList();
+
+        return Ok(photosWithUser);
     }
 
     // --- L'ANCIEN ENDPOINT RESTE LÀ, IL EST TOUJOURS UTILE ---
@@ -94,6 +103,8 @@ public class PhotosController : ControllerBase
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
+        var userName = User.FindFirstValue(ClaimTypes.Email)?.Split('@').First();
+
         var photos = await _context.Photos
             .Where(p => p.UserId == userId)
             .Select(p => new PhotoDto
@@ -101,7 +112,9 @@ public class PhotosController : ControllerBase
                 Id = p.Id,
                 Latitude = p.Latitude,
                 Longitude = p.Longitude,
-                ImageUrl = $"{Request.Scheme}://{Request.Host}/storage/{p.FileName}"
+                ImageUrl = $"{Request.Scheme}://{Request.Host}/storage/{p.FileName}",
+                IsOwner = true,
+                UserName = userName
             })
             .ToListAsync();
 
