@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations; // <-- AJOUTER CE USING !
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace YooVisitUserAPI.Models;
+namespace YooVisitStorageAPI.Data;
 
 public class UserApplication
 {

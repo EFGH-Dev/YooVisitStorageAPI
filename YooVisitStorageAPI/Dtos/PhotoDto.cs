@@ -8,5 +8,7 @@
         public string ImageUrl { get; set; }
         public bool IsOwner { get; set; }
         public string? UserName { get; set; }
+        public string? Description { get; set; }
+        public DateTime UploadedAt { get; set; }
     }
 }

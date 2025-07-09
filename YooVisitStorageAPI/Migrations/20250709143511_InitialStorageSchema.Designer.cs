@@ -12,8 +12,8 @@ using YooVisitStorageAPI.Data;
 namespace YooVisitStorageAPI.Migrations
 {
     [DbContext(typeof(StorageDbContext))]
-    [Migration("20250708123755_AddedUserIdToPhotoDatabase")]
-    partial class AddedUserIdToPhotoDatabase
+    [Migration("20250709143511_InitialStorageSchema")]
+    partial class InitialStorageSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,11 +25,39 @@ namespace YooVisitStorageAPI.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("YooVisitStorageAPI.Data.UserApplication", b =>
+                {
+                    b.Property<Guid>("IdUtilisateur")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("DateInscription")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("HashedPassword")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("IdUtilisateur");
+
+                    b.ToTable("Users", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
             modelBuilder.Entity("YooVisitStorageAPI.Models.Photo", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
 
                     b.Property<string>("FileName")
                         .IsRequired()

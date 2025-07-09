@@ -60,7 +60,8 @@ public class PhotosController : ControllerBase
             UploadedAt = DateTime.UtcNow,
             Latitude = request.Latitude,
             Longitude = request.Longitude,
-            UserId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!)
+            UserId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!),
+            Description = request.Description
         };
 
         _context.Photos.Add(photo);
@@ -84,14 +85,16 @@ public class PhotosController : ControllerBase
                              }).ToListAsync();
 
         var photosWithUser = rawData.Select(data => new PhotoDto
-            {
-                Id = data.PhotoData.Id,
-                Latitude = data.PhotoData.Latitude,
-                Longitude = data.PhotoData.Longitude,
-                ImageUrl = $"{Request.Scheme}://{Request.Host}/storage/{data.PhotoData.FileName}",
-                IsOwner = data.PhotoData.UserId == currentUserId,
-                UserName = data.UserEmail.Split('@').First()
-            }).ToList();
+        {
+            Id = data.PhotoData.Id,
+            Latitude = data.PhotoData.Latitude,
+            Longitude = data.PhotoData.Longitude,
+            ImageUrl = $"{Request.Scheme}://{Request.Host}/storage/{data.PhotoData.FileName}",
+            IsOwner = data.PhotoData.UserId == currentUserId,
+            UserName = data.UserEmail.Split('@').First(),
+            Description = data.PhotoData.Description,
+            UploadedAt = data.PhotoData.UploadedAt
+        }).ToList();
 
         return Ok(photosWithUser);
     }
