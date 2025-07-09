@@ -1,4 +1,7 @@
-﻿namespace YooVisitStorageAPI.PhotoInterface
+﻿using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
+
+namespace YooVisitStorageAPI.Interfaces
 {
     public interface IFileStorageService
     {

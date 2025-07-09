@@ -1,6 +1,12 @@
-﻿namespace YooVisitStorageAPI.PhotoServices
+﻿using Microsoft.AspNetCore.Http;
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using YooVisitStorageAPI.Interfaces;
+
+namespace YooVisitStorageAPI.Services
 {
-    using YooVisitStorageAPI.PhotoInterface;
 
     public class FileStorageService : IFileStorageService
     {
