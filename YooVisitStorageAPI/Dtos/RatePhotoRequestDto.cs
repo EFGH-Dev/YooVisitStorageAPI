@@ -1,0 +1,10 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace YooVisitStorageAPI.Dtos
+{
+    public class RatePhotoRequestDto
+    {
+        [Range(1, 5)] // On s'assure que la note est entre 1 et 5
+        public int Rating { get; set; }
+    }
+}

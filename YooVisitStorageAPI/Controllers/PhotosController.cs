@@ -60,7 +60,8 @@ public class PhotosController : ControllerBase
             UploadedAt = DateTime.UtcNow,
             Latitude = request.Latitude,
             Longitude = request.Longitude,
-            UserId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!)
+            UserId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!),
+            Description = request.Description
         };
 
         _context.Photos.Add(photo);
@@ -69,30 +70,43 @@ public class PhotosController : ControllerBase
         return Ok(new { PhotoId = photo.Id, FileName = newFileName });
     }
 
-    // --- ON AJOUTE LE NOUVEL ENDPOINT ICI ---
+    // --- ENDPOINT DE TOUTES LES PHOTOS ---
     [HttpGet("all-photos")]
     public async Task<IActionResult> GetAllPhotos()
     {
-        var photos = await _context.Photos
-            .Select(p => new PhotoDto
-            {
-                Id = p.Id,
-                Latitude = p.Latitude,
-                Longitude = p.Longitude,
-                // On construit une URL publique pour l'image
-                ImageUrl = $"{Request.Scheme}://{Request.Host}/storage/{p.FileName}"
-            })
-            .ToListAsync();
+        var currentUserId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-        return Ok(photos);
+        var rawData = await (from photo in _context.Photos
+                             join user in _context.Users on photo.UserId equals user.IdUtilisateur
+                             select new
+                             {
+                                 PhotoData = photo,
+                                 UserEmail = user.Email
+                             }).ToListAsync();
+
+        var photosWithUser = rawData.Select(data => new PhotoDto
+        {
+            Id = data.PhotoData.Id,
+            Latitude = data.PhotoData.Latitude,
+            Longitude = data.PhotoData.Longitude,
+            ImageUrl = $"{Request.Scheme}://{Request.Host}/storage/{data.PhotoData.FileName}",
+            IsOwner = data.PhotoData.UserId == currentUserId,
+            UserName = data.UserEmail.Split('@').First(),
+            Description = data.PhotoData.Description,
+            UploadedAt = data.PhotoData.UploadedAt
+        }).ToList();
+
+        return Ok(photosWithUser);
     }
 
-    // --- L'ANCIEN ENDPOINT RESTE LÀ, IL EST TOUJOURS UTILE ---
+    // --- ENDPOINT DE PHOTOS PERSONNELLES ---
     [Authorize]
     [HttpGet("my-photos")]
     public async Task<IActionResult> GetMyPhotos()
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var userName = User.FindFirstValue(ClaimTypes.Email)?.Split('@').First();
 
         var photos = await _context.Photos
             .Where(p => p.UserId == userId)
@@ -101,10 +115,66 @@ public class PhotosController : ControllerBase
                 Id = p.Id,
                 Latitude = p.Latitude,
                 Longitude = p.Longitude,
-                ImageUrl = $"{Request.Scheme}://{Request.Host}/storage/{p.FileName}"
+                ImageUrl = $"{Request.Scheme}://{Request.Host}/storage/{p.FileName}",
+                IsOwner = true,
+                UserName = userName
             })
             .ToListAsync();
 
         return Ok(photos);
+    }
+
+    [Authorize]
+    [HttpPost("{photoId}/rate")]
+    public async Task<IActionResult> RatePhoto(Guid photoId, [FromBody] RatePhotoRequestDto request)
+    {
+        // 1. On identifie le joueur qui donne la note (le "rateur")
+        var raterUserId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        // 2. On trouve la photo à noter
+        var photoToRate = await _context.Photos.FindAsync(photoId);
+        if (photoToRate == null)
+        {
+            return NotFound("Photo non trouvée.");
+        }
+
+        // 3. On vérifie que le joueur n'essaie pas de noter sa propre photo
+        if (photoToRate.UserId == raterUserId)
+        {
+            return BadRequest("Vous ne pouvez pas noter votre propre photo.");
+        }
+
+        // 4. On vérifie si ce joueur n'a pas déjà noté cette photo
+        var existingRating = await _context.PhotoRatings
+            .FirstOrDefaultAsync(r => r.PhotoId == photoId && r.RaterUserId == raterUserId);
+
+        if (existingRating != null)
+        {
+            return Conflict("Vous avez déjà noté cette photo.");
+        }
+
+        // 5. Tout est bon, on enregistre la nouvelle note
+        var newRating = new PhotoRating
+        {
+            Id = Guid.NewGuid(),
+            PhotoId = photoId,
+            RaterUserId = raterUserId,
+            RatingValue = request.Rating,
+            RatedAt = DateTime.UtcNow
+        };
+        _context.PhotoRatings.Add(newRating);
+
+        // 6. On trouve le propriétaire de la photo pour lui donner de l'XP
+        var photoOwner = await _context.Users.FindAsync(photoToRate.UserId);
+        if (photoOwner != null)
+        {
+            // Chaque note donne 10 points d'XP !
+            photoOwner.Experience += 10;
+        }
+
+        // 7. On sauvegarde toutes les modifications dans la base de données
+        await _context.SaveChangesAsync();
+
+        return Ok(new { Message = "Merci pour votre vote !", NewExperience = photoOwner?.Experience });
     }
 }
