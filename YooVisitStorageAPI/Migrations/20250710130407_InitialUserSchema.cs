@@ -6,11 +6,26 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace YooVisitStorageAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialStorageSchema : Migration
+    public partial class InitialUserSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "PhotoRatings",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PhotoId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RaterUserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RatingValue = table.Column<int>(type: "integer", nullable: false),
+                    RatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PhotoRatings", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Photos",
                 columns: table => new
@@ -28,11 +43,20 @@ namespace YooVisitStorageAPI.Migrations
                 {
                     table.PrimaryKey("PK_Photos", x => x.Id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PhotoRatings_PhotoId_RaterUserId",
+                table: "PhotoRatings",
+                columns: new[] { "PhotoId", "RaterUserId" },
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "PhotoRatings");
+
             migrationBuilder.DropTable(
                 name: "Photos");
         }

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace YooVisitStorageAPI.Data;
+namespace YooVisitStorageAPI.Models;
 
 public class UserApplication
 {
@@ -12,4 +12,5 @@ public class UserApplication
     public string HashedPassword { get; set; }
 
     public DateTime DateInscription { get; set; }
+    public int Experience { get; set; } = 0;
 }

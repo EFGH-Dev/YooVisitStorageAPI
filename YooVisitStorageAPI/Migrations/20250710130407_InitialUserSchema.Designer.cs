@@ -12,8 +12,8 @@ using YooVisitStorageAPI.Data;
 namespace YooVisitStorageAPI.Migrations
 {
     [DbContext(typeof(StorageDbContext))]
-    [Migration("20250709143511_InitialStorageSchema")]
-    partial class InitialStorageSchema
+    [Migration("20250710130407_InitialUserSchema")]
+    partial class InitialUserSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,31 +24,6 @@ namespace YooVisitStorageAPI.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("YooVisitStorageAPI.Data.UserApplication", b =>
-                {
-                    b.Property<Guid>("IdUtilisateur")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("DateInscription")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("HashedPassword")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("IdUtilisateur");
-
-                    b.ToTable("Users", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
-                });
 
             modelBuilder.Entity("YooVisitStorageAPI.Models.Photo", b =>
                 {
@@ -82,6 +57,60 @@ namespace YooVisitStorageAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Photos");
+                });
+
+            modelBuilder.Entity("YooVisitStorageAPI.Models.PhotoRating", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PhotoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("RatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("RaterUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("RatingValue")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PhotoId", "RaterUserId")
+                        .IsUnique();
+
+                    b.ToTable("PhotoRatings");
+                });
+
+            modelBuilder.Entity("YooVisitStorageAPI.Models.UserApplication", b =>
+                {
+                    b.Property<Guid>("IdUtilisateur")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("DateInscription")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Experience")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("HashedPassword")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("IdUtilisateur");
+
+                    b.ToTable("Users", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 #pragma warning restore 612, 618
         }
