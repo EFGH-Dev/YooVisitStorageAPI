@@ -11,6 +11,7 @@ public class StorageDbContext : DbContext
     public DbSet<Photo> Photos { get; set; }
     public DbSet<UserApplication> Users { get; set; }
     public DbSet<PhotoRating> PhotoRatings { get; set; }
+    public DbSet<Zone> Zones { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
