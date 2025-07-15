@@ -12,8 +12,8 @@ using YooVisitStorageAPI.Data;
 namespace YooVisitStorageAPI.Migrations
 {
     [DbContext(typeof(StorageDbContext))]
-    [Migration("20250710130407_InitialUserSchema")]
-    partial class InitialUserSchema
+    [Migration("20250715092120_AddZonesTable")]
+    partial class AddZonesTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -111,6 +111,31 @@ namespace YooVisitStorageAPI.Migrations
                         {
                             t.ExcludeFromMigrations();
                         });
+                });
+
+            modelBuilder.Entity("YooVisitStorageAPI.Models.Zone", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CoordinatesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Zones");
                 });
 #pragma warning restore 612, 618
         }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace YooVisitStorageAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialUserSchema : Migration
+    public partial class AddZonesTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -44,6 +44,21 @@ namespace YooVisitStorageAPI.Migrations
                     table.PrimaryKey("PK_Photos", x => x.Id);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Zones",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    CoordinatesJson = table.Column<string>(type: "text", nullable: false),
+                    CreatedByUserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Zones", x => x.Id);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_PhotoRatings_PhotoId_RaterUserId",
                 table: "PhotoRatings",
@@ -59,6 +74,9 @@ namespace YooVisitStorageAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "Photos");
+
+            migrationBuilder.DropTable(
+                name: "Zones");
         }
     }
 }

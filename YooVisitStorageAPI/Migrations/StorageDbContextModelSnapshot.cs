@@ -109,6 +109,31 @@ namespace YooVisitStorageAPI.Migrations
                             t.ExcludeFromMigrations();
                         });
                 });
+
+            modelBuilder.Entity("YooVisitStorageAPI.Models.Zone", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CoordinatesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Zones");
+                });
 #pragma warning restore 612, 618
         }
     }
