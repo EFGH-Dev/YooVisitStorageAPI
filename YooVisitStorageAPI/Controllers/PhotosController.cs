@@ -81,7 +81,8 @@ public class PhotosController : ControllerBase
                              select new
                              {
                                  PhotoData = photo,
-                                 UserEmail = user.Email
+                                 UserEmail = user.Email,
+                                 UserNom = user.Nom
                              }).ToListAsync();
 
         var photosWithUser = rawData.Select(data => new PhotoDto
@@ -91,7 +92,7 @@ public class PhotosController : ControllerBase
             Longitude = data.PhotoData.Longitude,
             ImageUrl = $"{Request.Scheme}://{Request.Host}/storage/{data.PhotoData.FileName}",
             IsOwner = data.PhotoData.UserId == currentUserId,
-            UserName = data.UserEmail.Split('@').First(),
+            UserName = data.UserNom ?? data.UserEmail.Split('@').First(),
             Description = data.PhotoData.Description,
             UploadedAt = data.PhotoData.UploadedAt
         }).ToList();
@@ -117,7 +118,9 @@ public class PhotosController : ControllerBase
                 Longitude = p.Longitude,
                 ImageUrl = $"{Request.Scheme}://{Request.Host}/storage/{p.FileName}",
                 IsOwner = true,
-                UserName = userName
+                UserName = userName,
+                Description = p.Description,
+                UploadedAt = p.UploadedAt
             })
             .ToListAsync();
 

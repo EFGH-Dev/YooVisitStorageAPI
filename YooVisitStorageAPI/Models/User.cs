@@ -13,4 +13,11 @@ public class UserApplication
 
     public DateTime DateInscription { get; set; }
     public int Experience { get; set; } = 0;
+
+    [Required]
+    [StringLength(50)]
+    public string? Nom { get; set; }
+
+    [StringLength(500)]
+    public string? Biographie { get; set; }
 }

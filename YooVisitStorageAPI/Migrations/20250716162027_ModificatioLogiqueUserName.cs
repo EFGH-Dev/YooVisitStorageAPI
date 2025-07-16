@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace YooVisitStorageAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class AddZonesTable : Migration
+    public partial class ModificatioLogiqueUserName : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

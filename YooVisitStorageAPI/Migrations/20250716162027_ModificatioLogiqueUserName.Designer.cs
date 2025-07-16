@@ -12,8 +12,8 @@ using YooVisitStorageAPI.Data;
 namespace YooVisitStorageAPI.Migrations
 {
     [DbContext(typeof(StorageDbContext))]
-    [Migration("20250715092120_AddZonesTable")]
-    partial class AddZonesTable
+    [Migration("20250716162027_ModificatioLogiqueUserName")]
+    partial class ModificatioLogiqueUserName
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -91,6 +91,10 @@ namespace YooVisitStorageAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Biographie")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<DateTime>("DateInscription")
                         .HasColumnType("timestamp with time zone");
 
@@ -104,6 +108,11 @@ namespace YooVisitStorageAPI.Migrations
                     b.Property<string>("HashedPassword")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("Nom")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("IdUtilisateur");
 
