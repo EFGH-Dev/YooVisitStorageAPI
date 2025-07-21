@@ -10,7 +10,7 @@ public class LatLngDto
     public double Longitude { get; set; }
 }
 
-public class CreateZoneRequestDto
+public class ZoneCreateRequestDto
 {
     [Required]
     [StringLength(100, MinimumLength = 3)]

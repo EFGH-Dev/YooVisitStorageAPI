@@ -23,7 +23,7 @@ public class ZonesController : ControllerBase
 
     // --- Endpoint pour CRÉER une nouvelle zone ---
     [HttpPost]
-    public async Task<IActionResult> CreateZone([FromBody] CreateZoneRequestDto request)
+    public async Task<IActionResult> CreateZone([FromBody] ZoneCreateRequestDto request)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 

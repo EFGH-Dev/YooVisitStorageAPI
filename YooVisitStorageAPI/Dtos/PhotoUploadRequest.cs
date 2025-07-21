@@ -11,4 +11,5 @@ public class PhotoUploadRequest
     // La longitude envoyée comme champ de formulaire
     public double Longitude { get; set; }
     public string? Description { get; set; }
+    public string Title { get; set; } = string.Empty;
 }

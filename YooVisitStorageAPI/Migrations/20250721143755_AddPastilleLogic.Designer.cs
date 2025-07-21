@@ -12,8 +12,8 @@ using YooVisitStorageAPI.Data;
 namespace YooVisitStorageAPI.Migrations
 {
     [DbContext(typeof(StorageDbContext))]
-    [Migration("20250715092120_AddZonesTable")]
-    partial class AddZonesTable
+    [Migration("20250721143755_AddPastilleLogic")]
+    partial class AddPastilleLogic
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,21 +25,22 @@ namespace YooVisitStorageAPI.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("YooVisitStorageAPI.Models.Photo", b =>
+            modelBuilder.Entity("YooVisitStorageAPI.Models.Pastille", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<double?>("Altitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
+                    b.Property<string>("HorairesOuverture")
                         .HasColumnType("text");
 
                     b.Property<double>("Latitude")
@@ -48,24 +49,28 @@ namespace YooVisitStorageAPI.Migrations
                     b.Property<double>("Longitude")
                         .HasColumnType("double precision");
 
-                    b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<string>("PeriodeConstruction")
+                        .HasColumnType("text");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("StyleArchitectural")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Photos");
+                    b.ToTable("Pastilles");
                 });
 
-            modelBuilder.Entity("YooVisitStorageAPI.Models.PhotoRating", b =>
+            modelBuilder.Entity("YooVisitStorageAPI.Models.PastilleRating", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("PhotoId")
+                    b.Property<Guid>("PastilleId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("RatedAt")
@@ -79,10 +84,37 @@ namespace YooVisitStorageAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PhotoId", "RaterUserId")
+                    b.HasIndex("PastilleId", "RaterUserId")
                         .IsUnique();
 
-                    b.ToTable("PhotoRatings");
+                    b.ToTable("PastilleRatings");
+                });
+
+            modelBuilder.Entity("YooVisitStorageAPI.Models.Photo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("PastilleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PastilleId");
+
+                    b.ToTable("Photos");
                 });
 
             modelBuilder.Entity("YooVisitStorageAPI.Models.UserApplication", b =>
@@ -90,6 +122,10 @@ namespace YooVisitStorageAPI.Migrations
                     b.Property<Guid>("IdUtilisateur")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Biographie")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("DateInscription")
                         .HasColumnType("timestamp with time zone");
@@ -104,6 +140,11 @@ namespace YooVisitStorageAPI.Migrations
                     b.Property<string>("HashedPassword")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("Nom")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("IdUtilisateur");
 
@@ -136,6 +177,22 @@ namespace YooVisitStorageAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Zones");
+                });
+
+            modelBuilder.Entity("YooVisitStorageAPI.Models.Photo", b =>
+                {
+                    b.HasOne("YooVisitStorageAPI.Models.Pastille", "Pastille")
+                        .WithMany("Photos")
+                        .HasForeignKey("PastilleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Pastille");
+                });
+
+            modelBuilder.Entity("YooVisitStorageAPI.Models.Pastille", b =>
+                {
+                    b.Navigation("Photos");
                 });
 #pragma warning restore 612, 618
         }
